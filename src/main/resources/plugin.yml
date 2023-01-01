@@ -1,0 +1,34 @@
+name: IPASTools
+version: '${project.version}'
+main: ca.spottedleaf.ipastools.IPASTools
+api-version: 1.19
+authors: [ Spottedleaf ]
+description: Tools for blacklisting AS numbers, tracking players by AS number, reporting AS numbers in logs
+
+commands:
+  as:
+    description: AS core command.
+    aliases: []
+    permission: as.command.as
+    permission-message: You do not have permission to execute this command.
+    usage: /<command> <help, reload, lookup, ban, unban> [arguments]
+
+permissions:
+  as.command.as:
+    description: Allows access to the /as command.
+    default: op
+  as.command.ashelp:
+    description: Allows access to the /as help command.
+    default: op
+  as.command.asreload:
+    description: Allows access to the /as reload command.
+    default: op
+  as.command.aslookup:
+    description: Allows access to the /as lookup command.
+    default: op
+  as.command.asban:
+    description: Allows access to the /as ban command.
+    default: op
+  as.command.asunban:
+    description: Allows access to the /as unban command.
+    default: op
