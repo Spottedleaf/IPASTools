@@ -50,28 +50,7 @@ public final class ASCommandLookup implements ASCommand.ASSubCommand {
                                 )
                 )
                 .append(
-                        Component.text().content(" [player limit]").color(OPTIONAL_ARG_COLOUR)
-                                .hoverEvent(
-                                        Component.text()
-                                                .content(
-                                                        """
-                                                                The player limit. The format is "<offline or online>[,count]"
-                                                                By default, this is "offline." Offline will show players
-                                                                who are not logged in, and online will show players who are
-                                                                logged in. If count is absent, then it is defaulted to 20.
-                                                                Example: /as lookup jeb_ offline,10 - Looks up AS by player name,
-                                                                showing only the last 10 online and offline users who have
-                                                                the same AS number.
-                                                                Example: /as lookup 1.1.1.1 online,10 - Looks up AS by IPv4,
-                                                                showing only the last 10 online users who have the same AS number.
-                                                                """
-                                                )
-                                                .color(HELP_DESCRIPTION_COLOUR)
-                                                .build()
-                                )
-                )
-                .append(
-                        Component.text().content(" - Look up users who share a common AS number.")
+                        Component.text().content(" - Look up an AS number for a user.")
                                 .color(HELP_DESCRIPTION_COLOUR)
                 )
                 .build();
@@ -182,16 +161,28 @@ public final class ASCommandLookup implements ASCommand.ASSubCommand {
     @Override
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String label,
                              @NotNull final String[] args) {
-        /*
-                                                                        Example: /as lookup 853c80ef-3c37-49fd-aa49-938b674adae6 - Looks up player by UUID
-                                                                Example: /as lookup 853c80ef3c3749fdaa49938b674adae6 - Looks up player by UUID without dashes
-                                                                Example: /as lookup jeb_ - Looks up player by name
-                                                                Example: /as lookup 1.1.1.1 - Looks up directly by IP entry
-                                                                Example: /as lookup 13335 - Looks up directly by AS number
-         */
+        ASCommandLookup.handleErrors(sender, args[0], ASCommandLookup.lookupAS(args[0]))
+                .thenAccept((final Integer res) -> {
+                            if (res == null) {
+                                return;
+                            }
 
+                            final int ASNumber = res.intValue();
+                            final String ASName = ASCommandLookup.this.plugin.getLookup().lookupASName(ASNumber);
+                            final boolean banned = ASCommandLookup.this.plugin.getBans().getKickReason(ASNumber) != null;
 
-
+                            sender.sendMessage(
+                                    Component.text()
+                                            .content(
+                                                    "For input '" + args[0] + "': ASNumber: " + ASNumber + ", ASName: " +
+                                                            (ASName == null ? "Unknown AS Number" : ASName) +
+                                                            ", Banned: " + banned
+                                            )
+                                            .color(COMMAND_SUCCESS_COLOUR)
+                                            .build()
+                            );
+                        }
+                );
         return true;
     }
 
@@ -202,8 +193,6 @@ public final class ASCommandLookup implements ASCommand.ASSubCommand {
             return Util.getAllPlayerNames();
         } else if (args.length == 1) {
             return Util.getAllSorted(args[0], Util.getAllPlayerNames());
-        } else if (args.length == 2) {
-            return Util.getAllSorted(args[1], Arrays.asList("online", "offline"));
         }
 
         return Collections.emptyList();
