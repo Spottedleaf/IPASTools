@@ -83,48 +83,38 @@ public final class ASCommandBan implements ASCommand.ASSubCommand {
 
                             sender.sendMessage(
                                     Component.text()
-                                    .content("Banned AS number " + ASNumber + ", AS name '" + (ASName == null ? "Unknown AS Number" : ASName) + "' with reason '" + reason + "'")
-                                    .color(COMMAND_SUCCESS_COLOUR)
-                                    .build()
+                                            .content("Banned AS number " + ASNumber + ", AS name '" + (ASName == null ? "Unknown AS Number" : ASName) + "' with reason '" + reason + "'")
+                                            .color(COMMAND_SUCCESS_COLOUR)
+                                            .build()
                             );
 
-                            final Runnable kickAll = () -> {
-                                for (final Player player : new ArrayList<>(Bukkit.getOnlinePlayers())) {
-                                    final ASPlayerState state = ASPlayerState.getUserData(player.getUniqueId());
-                                    if (state == null) {
-                                        // logged out
-                                        continue;
-                                    }
-                                    final ASPlayerState.ASLoginEntry lastEntry = state.getLastLoginEntry();
-                                    if (lastEntry == null || lastEntry.ASNumber() != ASNumber) {
-                                        // no match
-                                        continue;
-                                    }
-
-                                    sender.sendMessage(
-                                            Component.text()
-                                                    .content("Kicking player " + player.getName())
-                                                    .color(COMMAND_SUCCESS_COLOUR)
-                                                    .build()
-                                    );
-
-                                    // match
-                                    player.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
+                            for (final Player player : new ArrayList<>(Bukkit.getOnlinePlayers())) {
+                                final ASPlayerState state = ASPlayerState.getUserData(player.getUniqueId());
+                                if (state == null) {
+                                    // logged out
+                                    continue;
                                 }
-                            };
+                                final ASPlayerState.ASLoginEntry lastEntry = state.getLastLoginEntry();
+                                if (lastEntry == null || lastEntry.ASNumber() != ASNumber) {
+                                    // no match
+                                    continue;
+                                }
 
-                            // TODO region threading check
-                            if (true) {
-                                // not safe to fire async, since shutdown can block on this task executing, and kick
-                                // will block on main completing...
-                                Bukkit.getScheduler().runTask(ASCommandBan.this.plugin, kickAll);
-                            } else {
-                                // in region threading, kick does not block on main but rather just fires a request to be
-                                // completed async if fired async off of the player's region
+                                sender.sendMessage(
+                                        Component.text()
+                                                .content("Kicking player " + player.getName())
+                                                .color(COMMAND_SUCCESS_COLOUR)
+                                                .build()
+                                );
 
-                                // race conditions about missing players don't matter here, since the join event will catch any
-                                // player we miss
-                                kickAll.run();
+                                // match
+                                player.getScheduler().execute(
+                                        ASCommandBan.this.plugin,
+                                        (Player p) -> {
+                                            p.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
+                                        },
+                                        null, 1L
+                                 );
                             }
                         }
                 );

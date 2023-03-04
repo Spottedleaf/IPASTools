@@ -90,19 +90,12 @@ public final class PlayerConnectionListener implements Listener {
             return;
         }
 
-        final Runnable run = () -> {
+        player.getScheduler().execute(this.plugin, (final Player p) -> {
             final String reason = PlayerConnectionListener.this.plugin.getBans().getKickReason(entry.ASNumber());
             if (reason != null) {
-                player.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
+                p.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
             }
-        };
-
-        // TODO region threading hooks
-        if (true) {
-            Bukkit.getScheduler().runTask(this.plugin, run);
-        } else {
-            // TODO
-        }
+        }, null, 1L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
