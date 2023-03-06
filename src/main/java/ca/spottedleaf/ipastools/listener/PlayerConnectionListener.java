@@ -90,10 +90,10 @@ public final class PlayerConnectionListener implements Listener {
             return;
         }
 
-        player.getScheduler().execute(this.plugin, (final Player p) -> {
+        player.getScheduler().execute(this.plugin, () -> {
             final String reason = PlayerConnectionListener.this.plugin.getBans().getKickReason(entry.ASNumber());
             if (reason != null) {
-                p.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
+                player.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
             }
         }, null, 1L);
     }

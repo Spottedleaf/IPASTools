@@ -4,6 +4,7 @@ main: ca.spottedleaf.ipastools.IPASTools
 api-version: 1.19
 authors: [ Spottedleaf ]
 description: Tools for blacklisting AS numbers, tracking players by AS number, reporting AS numbers in logs
+folia-supported: true
 
 commands:
   as:

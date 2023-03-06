@@ -110,8 +110,8 @@ public final class ASCommandBan implements ASCommand.ASSubCommand {
                                 // match
                                 player.getScheduler().execute(
                                         ASCommandBan.this.plugin,
-                                        (Player p) -> {
-                                            p.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
+                                        () -> {
+                                            player.kick(Component.text().content(reason).build(), PlayerKickEvent.Cause.BANNED);
                                         },
                                         null, 1L
                                  );
